@@ -38,6 +38,30 @@ public class ChaptersController : ControllerBase
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
+        // Fetch series
+        var series = await _context.Series.FirstOrDefaultAsync(s => s.Id == seriesId);
+
+        if (series == null)
+            return NotFound("Series not found");
+
+        // Creator override (owner always has access)
+        if (series.CreatorId == userId)
+        {
+            var creatorChapters = await _context
+                .Chapters.Where(c => c.SeriesId == seriesId)
+                .ToListAsync();
+
+            var creatorResult = creatorChapters.Select(c => new ChapterDto
+            {
+                Id = c.Id,
+                Title = c.Title,
+                SortOrder = c.SortOrder,
+                SeriesId = c.SeriesId,
+            });
+
+            return Ok(creatorResult);
+        }
+
         // Check if user has access (purchased) to the series
         var hasAccess = await _accessService.HasAccessToSeries(userId, seriesId);
 
