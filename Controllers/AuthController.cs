@@ -103,7 +103,7 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Secure = false,
-                SameSite = SameSiteMode.Lax,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7),
             }
         );
