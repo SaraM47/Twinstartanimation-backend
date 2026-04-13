@@ -20,7 +20,6 @@ public class OrderService : IOrderService
     {
         // Get all product IDs from request
         var productIds = dto.Items.Select(i => i.ProductId).ToList();
-
         // Load products from database
         var products = await _context.Products.Where(p => productIds.Contains(p.Id)).ToListAsync();
 
@@ -28,7 +27,12 @@ public class OrderService : IOrderService
         if (products.Count != productIds.Count)
             throw new Exception("One or more products not found");
 
-        var order = new Order { UserId = userId, Items = new List<OrderItem>() };
+        var order = new Order
+        {
+            UserId = userId,
+            Items = new List<OrderItem>(),
+            CreatedAt = DateTime.UtcNow,
+        };
 
         decimal total = 0;
 
@@ -49,13 +53,18 @@ public class OrderService : IOrderService
             order.Items.Add(orderItem);
         }
 
-        // Set total price
         order.TotalAmount = total;
 
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
 
-        return new OrderDto { Id = order.Id, TotalAmount = order.TotalAmount };
+        return new OrderDto
+        {
+            Id = order.Id,
+            TotalAmount = order.TotalAmount,
+            Status = order.Status,
+            CreatedAt = order.CreatedAt,
+        };
     }
 
     // GET order with items
@@ -79,13 +88,14 @@ public class OrderService : IOrderService
             .ThenInclude(i => i.Product)
             .ToListAsync();
 
-        // Map orders to DTOs
         return orders
             .Select(o => new OrderDto
             {
                 Id = o.Id,
                 TotalAmount = o.TotalAmount,
                 Status = o.Status,
+                CreatedAt = o.CreatedAt,
+
                 Items = o
                     .Items.Select(i => new OrderItemDto
                     {

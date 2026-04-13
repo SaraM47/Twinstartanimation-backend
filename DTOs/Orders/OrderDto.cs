@@ -8,5 +8,7 @@ public class OrderDto
     public decimal TotalAmount { get; set; } // Total cost of the order
     public string Status { get; set; } = string.Empty; // Current status of the order (e.g., "Pending", "Completed", "Cancelled")
 
+    public DateTime CreatedAt { get; set; } // Display date
+
     public List<OrderItemDto> Items { get; set; } = new(); // List of items included in the order, with product details and quantity
 }
