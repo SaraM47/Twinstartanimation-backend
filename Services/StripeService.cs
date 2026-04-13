@@ -50,8 +50,8 @@ public class StripeService : IStripeService
             Mode = "payment",
 
             // Redirect URLs after payment success or cancellation
-            SuccessUrl = "http://localhost:5066/swagger",
-            CancelUrl = "http://localhost:5066/swagger",
+            SuccessUrl = "http://localhost:5174/success",
+            CancelUrl = "http://localhost:5174/cancel",
         };
 
         var service = new SessionService();
