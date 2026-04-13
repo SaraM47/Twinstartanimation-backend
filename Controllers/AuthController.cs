@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -103,7 +104,7 @@ public class AuthController : ControllerBase
             {
                 HttpOnly = true,
                 Secure = false,
-                SameSite = SameSiteMode.None,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(7),
             }
         );
@@ -119,11 +120,47 @@ public class AuthController : ControllerBase
         );
     }
 
+    // Get current user info
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> Me()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+            return Unauthorized();
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return Ok(
+            new
+            {
+                userId = user.Id,
+                email = user.Email,
+                roles,
+            }
+        );
+    }
+
     // Logout
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("token");
+        Response.Cookies.Delete(
+            "token",
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+            }
+        );
+
         return Ok(new { message = "Logged out" });
     }
 
