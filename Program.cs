@@ -39,6 +39,16 @@ builder
     })
     .AddJwtBearer(options =>
     {
+        // 🔥 Läs token från HttpOnly cookie
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["token"];
+                return Task.CompletedTask;
+            },
+        };
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
@@ -67,6 +77,22 @@ builder.Services.AddAuthorization();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+// Added CORS for the frontend cookies
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "frontend",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+    );
+});
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -129,6 +155,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// CORS before auth
+app.UseCors("frontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
