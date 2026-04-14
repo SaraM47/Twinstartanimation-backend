@@ -4,5 +4,6 @@ public class CreateExternalLinkDto
 {
     public string Title { get; set; } = string.Empty; // Title or label of the link
     public string Url { get; set; } = string.Empty; // The actual URL of the external link
+    public string? Platform { get; set; } // Optional platform type such as YouTube or Patreon
     public int ChapterId { get; set; } // ID of the chapter this link is associated with
 }
