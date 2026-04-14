@@ -39,7 +39,7 @@ builder
     })
     .AddJwtBearer(options =>
     {
-        // 🔥 Läs token från HttpOnly cookie
+        // Läs token från HttpOnly cookie
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -78,7 +78,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// Added CORS for the frontend cookies
+// Added CORS for cookies and auth
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -156,7 +156,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// CORS before auth
+// CORS before auth to allow cookies to be sent from frontend
 app.UseCors("frontend");
 
 app.UseAuthentication();
