@@ -10,4 +10,13 @@ public class CreatorDashboardDto
 
     // Total number of orders placed
     public int TotalOrders { get; set; }
+
+    // Total number of products created by the creator
+    public int TotalProducts { get; set; }
+
+    // Total number of series created by the creator
+    public int TotalSeries { get; set; }
+
+    // Total number of chapters across all series created by the creator
+    public int TotalChapters { get; set; }
 }
