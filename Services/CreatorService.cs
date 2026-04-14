@@ -16,16 +16,26 @@ public class CreatorService : ICreatorService
     public async Task<CreatorDashboardDto> GetDashboardAsync(string creatorId)
     {
         // Get all paid order items belonging to this creator
-        var orderItems = await _context
+        // Query order items for products created by this creator, only for paid orders
+        var orderItemsQuery = _context
             .OrderItems.Include(oi => oi.Product)
             .Include(oi => oi.Order)
-            .Where(oi => oi.Product.CreatorId == creatorId && oi.Order.Status == "Paid")
-            .ToListAsync();
+            .Where(oi => oi.Product.CreatorId == creatorId && oi.Order.Status == "Paid");
 
         // Calculate metrics
-        var totalRevenue = orderItems.Sum(oi => oi.Price * oi.Quantity);
-        var totalSales = orderItems.Sum(oi => oi.Quantity);
-        var totalOrders = orderItems.Select(oi => oi.OrderId).Distinct().Count();
+        var totalRevenue = await orderItemsQuery.SumAsync(oi => oi.Price * oi.Quantity);
+
+        var totalSales = await orderItemsQuery.SumAsync(oi => oi.Quantity);
+
+        var totalOrders = await orderItemsQuery.Select(oi => oi.OrderId).Distinct().CountAsync();
+
+        var totalProducts = await _context.Products.CountAsync(p => p.CreatorId == creatorId);
+
+        var totalSeries = await _context.Series.CountAsync(s => s.CreatorId == creatorId);
+
+        var totalChapters = await _context
+            .Chapters.Where(c => c.Series.CreatorId == creatorId)
+            .CountAsync();
 
         // Return the metrics as a DTO
         return new CreatorDashboardDto
@@ -33,6 +43,9 @@ public class CreatorService : ICreatorService
             TotalRevenue = totalRevenue,
             TotalSales = totalSales,
             TotalOrders = totalOrders,
+            TotalProducts = totalProducts,
+            TotalSeries = totalSeries,
+            TotalChapters = totalChapters,
         };
     }
 }
