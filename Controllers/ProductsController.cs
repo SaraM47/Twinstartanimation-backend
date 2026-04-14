@@ -104,20 +104,105 @@ public class ProductsController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Find product by ID
-        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+        // Find product by ID and load related data
+        var product = await _context
+            .Products.Include(p => p.Series)
+            .ThenInclude(s => s.Chapters)
+            .ThenInclude(c => c.Pages)
+            .Include(p => p.Series)
+            .ThenInclude(s => s.Chapters)
+            .ThenInclude(c => c.Videos)
+            .Include(p => p.Series)
+            .ThenInclude(s => s.Chapters)
+            .ThenInclude(c => c.Links)
+            .Include(p => p.Series)
+            .ThenInclude(s => s.Videos)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product == null)
             return NotFound();
 
+        // Ensure creator owns the product
         if (product.CreatorId != userId)
             return StatusCode(403, "You do not own this product");
 
-        // Remove product from database
-        _context.Products.Remove(product);
-        await _context.SaveChangesAsync();
+        // Prevent deleting product if it exists in orders
+        var hasOrders = await _context.OrderItems.AnyAsync(oi => oi.ProductId == id);
 
-        // Return success message
-        return Ok(new { message = "Deleted" });
+        if (hasOrders)
+        {
+            return BadRequest(
+                new
+                {
+                    message = "This product cannot be deleted because it exists in one or more orders.",
+                }
+            );
+        }
+
+        // Use transaction to avoid partial deletes
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            // Delete all related content (Series → Chapters → Media)
+            foreach (var series in product.Series)
+            {
+                // Series-level videos
+                if (series.Videos.Any())
+                {
+                    _context.Videos.RemoveRange(series.Videos);
+                }
+
+                foreach (var chapter in series.Chapters)
+                {
+                    if (chapter.Pages.Any())
+                    {
+                        _context.Pages.RemoveRange(chapter.Pages);
+                    }
+
+                    if (chapter.Videos.Any())
+                    {
+                        _context.Videos.RemoveRange(chapter.Videos);
+                    }
+
+                    if (chapter.Links.Any())
+                    {
+                        _context.ExternalLinks.RemoveRange(chapter.Links);
+                    }
+                }
+
+                if (series.Chapters.Any())
+                {
+                    _context.Chapters.RemoveRange(series.Chapters);
+                }
+            }
+
+            if (product.Series.Any())
+            {
+                _context.Series.RemoveRange(product.Series);
+            }
+
+            // Remove product from database
+            _context.Products.Remove(product);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            // Return success message
+            return Ok(new { message = "Deleted" });
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+
+            return StatusCode(
+                500,
+                new
+                {
+                    message = "An error occurred while deleting the product.",
+                    details = ex.Message,
+                }
+            );
+        }
     }
 }
