@@ -379,6 +379,7 @@ public class MediaController : ControllerBase
                 l.Id,
                 l.Title,
                 l.Url,
+                l.Platform,
                 l.ChapterId,
             })
         );
@@ -398,6 +399,7 @@ public class MediaController : ControllerBase
         {
             Title = dto.Title,
             Url = dto.Url,
+            Platform = dto.Platform,
             ChapterId = dto.ChapterId,
         };
 
@@ -410,6 +412,45 @@ public class MediaController : ControllerBase
                 link.Id,
                 link.Title,
                 link.Url,
+                link.Platform,
+                link.ChapterId,
+            }
+        );
+    }
+
+    // Update an external link
+    [Authorize(Roles = "Creator")]
+    [HttpPut("links/{id}")]
+    public async Task<IActionResult> UpdateLink(int id, CreateExternalLinkDto dto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var link = await _context
+            .ExternalLinks.Include(l => l.Chapter)
+            .ThenInclude(c => c.Series)
+            .FirstOrDefaultAsync(l => l.Id == id);
+
+        if (link == null)
+            return NotFound();
+
+        // Ownership check
+        if (link.Chapter.Series.CreatorId != userId)
+            return StatusCode(403, "You do not own this content");
+
+        // Update fields
+        link.Title = dto.Title;
+        link.Url = dto.Url;
+        link.Platform = dto.Platform;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(
+            new
+            {
+                link.Id,
+                link.Title,
+                link.Url,
+                link.Platform,
                 link.ChapterId,
             }
         );
