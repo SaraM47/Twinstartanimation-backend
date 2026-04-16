@@ -39,12 +39,20 @@ builder
     })
     .AddJwtBearer(options =>
     {
-        // Läs token från HttpOnly cookie
+        // Read token from HttpOnly cookie
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
-                context.Token = context.Request.Cookies["token"];
+                var token = context.Request.Cookies["token"];
+
+                Console.WriteLine($"TOKEN FOUND: {token != null}");
+
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Token = token;
+                }
+
                 return Task.CompletedTask;
             },
         };
