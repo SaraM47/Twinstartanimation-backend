@@ -26,17 +26,14 @@ public class ChaptersController : ControllerBase
         _accessService = accessService;
     }
 
-    // GET chapters (Customer)
-    // Requires user to be logged in and have purchased the series
-    [Authorize]
+    // GET chapters (Public)
+    // Does no need a user to be logegd in and have pruchased the series. Now public preview (no purchase required)
+    [AllowAnonymous]
     [HttpGet("series/{seriesId}")]
     public async Task<IActionResult> GetChapters(int seriesId)
     {
-        // Get user ID from JWT token
+        // Get user ID from JWT token (optional now)
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
 
         // Fetch series
         var series = await _context.Series.FirstOrDefaultAsync(s => s.Id == seriesId);
@@ -44,32 +41,11 @@ public class ChaptersController : ControllerBase
         if (series == null)
             return NotFound("Series not found");
 
-        // Creator override (owner always has access)
-        if (series.CreatorId == userId)
-        {
-            var creatorChapters = await _context
-                .Chapters.Where(c => c.SeriesId == seriesId)
-                .ToListAsync();
-
-            var creatorResult = creatorChapters.Select(c => new ChapterDto
-            {
-                Id = c.Id,
-                Title = c.Title,
-                SortOrder = c.SortOrder,
-                SeriesId = c.SeriesId,
-            });
-
-            return Ok(creatorResult);
-        }
-
-        // Check if user has access (purchased) to the series
-        var hasAccess = await _accessService.HasAccessToSeries(userId, seriesId);
-
-        if (!hasAccess)
-            return StatusCode(403, "You have not purchased this content");
-
-        // Fetch chapters for the series
-        var chapters = await _context.Chapters.Where(c => c.SeriesId == seriesId).ToListAsync();
+        // Public Fetch chapters for everyone
+        var chapters = await _context
+            .Chapters.Where(c => c.SeriesId == seriesId)
+            .OrderBy(c => c.SortOrder)
+            .ToListAsync();
 
         // Convert to DTO (safe response)
         var result = chapters.Select(c => new ChapterDto
@@ -94,6 +70,7 @@ public class ChaptersController : ControllerBase
         // Fetch chapters only if creator owns the series
         var chapters = await _context
             .Chapters.Where(c => c.SeriesId == seriesId && c.Series.CreatorId == userId)
+            .OrderBy(c => c.SortOrder)
             .ToListAsync();
 
         // Convert to DTO (safe response)
