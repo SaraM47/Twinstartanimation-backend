@@ -28,4 +28,9 @@ public class Series
 
     // Videos attached at series level (e.g. animations)
     public List<Video> Videos { get; set; } = new();
+
+    // Fields for add, status and genres to be used only for comics
+    public string? Authors { get; set; }
+    public string? Status { get; set; }
+    public string? Genres { get; set; }
 }
