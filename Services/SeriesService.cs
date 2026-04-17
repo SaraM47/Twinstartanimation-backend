@@ -37,6 +37,11 @@ public class SeriesService : ISeriesService
             // Ownership
             CreatorId = creatorId,
 
+            // Field for comics metadata
+            Authors = dto.Authors,
+            Status = dto.Status,
+            Genres = dto.Genres,
+
             CreatedAt = DateTime.UtcNow,
         };
 
@@ -50,6 +55,13 @@ public class SeriesService : ISeriesService
             Title = series.Title,
             Description = series.Description,
             CoverImageUrl = series.CoverImageUrl,
+
+            Authors = series.Authors,
+            Status = series.Status,
+            Genres = series.Genres,
+
+            AverageRating = 0,
+
             CreatorId = series.CreatorId,
             CreatedAt = series.CreatedAt,
         };
@@ -66,6 +78,18 @@ public class SeriesService : ISeriesService
                 Title = s.Title,
                 Description = s.Description,
                 CoverImageUrl = s.CoverImageUrl,
+
+                Authors = s.Authors,
+                Status = s.Status,
+                Genres = s.Genres,
+
+                AverageRating =
+                    _context
+                        .Ratings.Where(r => r.SeriesId == s.Id)
+                        .Select(r => (double?)r.Value)
+                        .Average()
+                    ?? 0,
+
                 CreatorId = s.CreatorId,
                 CreatedAt = s.CreatedAt,
             })
@@ -84,6 +108,19 @@ public class SeriesService : ISeriesService
                 Title = s.Title,
                 Description = s.Description,
                 CoverImageUrl = s.CoverImageUrl,
+
+                // Optional metadata fields
+                Authors = s.Authors,
+                Status = s.Status,
+                Genres = s.Genres,
+
+                AverageRating =
+                    _context
+                        .Ratings.Where(r => r.SeriesId == s.Id)
+                        .Select(r => (double?)r.Value)
+                        .Average()
+                    ?? 0,
+
                 CreatorId = s.CreatorId,
                 CreatedAt = s.CreatedAt,
             })
@@ -101,6 +138,11 @@ public class SeriesService : ISeriesService
         series.Title = dto.Title;
         series.Description = dto.Description;
         series.CoverImageUrl = dto.CoverImageUrl;
+
+        // Fields that can be updated by the creator
+        series.Authors = dto.Authors;
+        series.Status = dto.Status;
+        series.Genres = dto.Genres;
 
         await _context.SaveChangesAsync();
         return true;
