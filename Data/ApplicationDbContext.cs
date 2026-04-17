@@ -25,6 +25,7 @@ namespace Twinstaranimation_backend.API.Data
         public DbSet<Page> Pages { get; set; }
         public DbSet<Video> Videos { get; set; }
         public DbSet<ExternalLink> ExternalLinks { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
 
         // Model configuration using Fluent API
         protected override void OnModelCreating(ModelBuilder builder)
