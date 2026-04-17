@@ -10,4 +10,10 @@ public class SeriesDto
     public string CoverImageUrl { get; set; } = string.Empty;
     public string? CreatorId { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public string? Authors { get; set; }
+    public string? Status { get; set; }
+    public string? Genres { get; set; }
+
+    public double AverageRating { get; set; }
 }

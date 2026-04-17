@@ -4,8 +4,8 @@ namespace Twinstaranimation_backend.API.DTOs.Series;
 
 public class CreateSeriesDto
 {
-    // ID of the product this series belongs to
-    public int ProductId { get; set; }
+    // ID of the product this series belongs to (nullable supports free content)
+    public int? ProductId { get; set; }
 
     // Title of the series
     public string Title { get; set; } = string.Empty;
@@ -15,4 +15,9 @@ public class CreateSeriesDto
 
     // Cover image for the series
     public string CoverImageUrl { get; set; } = string.Empty;
+
+    // Optional fields for comics
+    public string? Authors { get; set; }
+    public string? Status { get; set; }
+    public string? Genres { get; set; }
 }
