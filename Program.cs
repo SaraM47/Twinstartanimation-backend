@@ -29,6 +29,7 @@ builder.Services.AddScoped<ISeriesService, SeriesService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICreatorService, CreatorService>();
 builder.Services.AddScoped<IAccessService, AccessService>();
+builder.Services.AddScoped<IRatingService, RatingService>();
 
 // Authentication
 builder
