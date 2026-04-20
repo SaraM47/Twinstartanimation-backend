@@ -1,6 +1,6 @@
 namespace Twinstaranimation_backend.API.Models;
 
-// Represents a video that can belong to either a series or a chapter.
+// Represents a video that can belong to either a series, chapter, or episode.
 public class Video
 {
     public int Id { get; set; }
@@ -17,7 +17,11 @@ public class Video
     public int? ChapterId { get; set; }
     public Chapter? Chapter { get; set; }
 
-    // Sort order for videos within a series or chapter (optional, default to 0)
+    // Optional link to Episode (for animation episodes)
+    public int? EpisodeId { get; set; }
+    public Episode? Episode { get; set; }
+
+    // Sort order for videos within a series, chapter, or episode
     public int SortOrder { get; set; }
 
     // Timestamp when the video was created
