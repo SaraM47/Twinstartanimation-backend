@@ -259,6 +259,34 @@ namespace Twinstartanimation_backend.API.Migrations
                     b.ToTable("Chapters");
                 });
 
+            modelBuilder.Entity("Twinstaranimation_backend.API.Models.Episode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("Episode");
+                });
+
             modelBuilder.Entity("Twinstaranimation_backend.API.Models.ExternalLink", b =>
                 {
                     b.Property<int>("Id")
@@ -513,6 +541,9 @@ namespace Twinstartanimation_backend.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("EpisodeId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("SeriesId")
                         .HasColumnType("int");
 
@@ -530,6 +561,8 @@ namespace Twinstartanimation_backend.API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ChapterId");
+
+                    b.HasIndex("EpisodeId");
 
                     b.HasIndex("SeriesId");
 
@@ -591,6 +624,17 @@ namespace Twinstartanimation_backend.API.Migrations
                 {
                     b.HasOne("Twinstaranimation_backend.API.Models.Series", "Series")
                         .WithMany("Chapters")
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("Twinstaranimation_backend.API.Models.Episode", b =>
+                {
+                    b.HasOne("Twinstaranimation_backend.API.Models.Series", "Series")
+                        .WithMany("Episodes")
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -701,11 +745,17 @@ namespace Twinstartanimation_backend.API.Migrations
                         .WithMany("Videos")
                         .HasForeignKey("ChapterId");
 
+                    b.HasOne("Twinstaranimation_backend.API.Models.Episode", "Episode")
+                        .WithMany("Videos")
+                        .HasForeignKey("EpisodeId");
+
                     b.HasOne("Twinstaranimation_backend.API.Models.Series", "Series")
                         .WithMany("Videos")
                         .HasForeignKey("SeriesId");
 
                     b.Navigation("Chapter");
+
+                    b.Navigation("Episode");
 
                     b.Navigation("Series");
                 });
@@ -726,6 +776,11 @@ namespace Twinstartanimation_backend.API.Migrations
                     b.Navigation("Videos");
                 });
 
+            modelBuilder.Entity("Twinstaranimation_backend.API.Models.Episode", b =>
+                {
+                    b.Navigation("Videos");
+                });
+
             modelBuilder.Entity("Twinstaranimation_backend.API.Models.Order", b =>
                 {
                     b.Navigation("Items");
@@ -739,6 +794,8 @@ namespace Twinstartanimation_backend.API.Migrations
             modelBuilder.Entity("Twinstaranimation_backend.API.Models.Series", b =>
                 {
                     b.Navigation("Chapters");
+
+                    b.Navigation("Episodes");
 
                     b.Navigation("Videos");
                 });
