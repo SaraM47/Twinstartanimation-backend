@@ -26,6 +26,9 @@ public class Series
     // Chapters inside the series
     public List<Chapter> Chapters { get; set; } = new();
 
+    // Episodes inside the series (for animation content)
+    public List<Episode> Episodes { get; set; } = new();
+
     // Videos attached at series level (e.g. animations)
     public List<Video> Videos { get; set; } = new();
 
