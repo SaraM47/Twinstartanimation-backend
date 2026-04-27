@@ -56,8 +56,8 @@ public class OrdersController : ControllerBase
     }
 
     // GET my orders
-    // Returns all orders for the logged-in user
-    [Authorize]
+    // Returns all orders for the logged-in user (customer)
+    [Authorize(Roles = "Customer")]
     [HttpGet("my")]
     public async Task<IActionResult> GetMyOrders()
     {
