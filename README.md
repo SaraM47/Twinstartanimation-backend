@@ -176,7 +176,7 @@ POST /api/Auth/login
 GET  /api/Auth/me
 POST /api/Auth/logout
 ```
-Series
+### Series
 
 Example endpoints:
 
@@ -187,7 +187,7 @@ POST   /api/Series
 PUT    /api/Series/{id}
 DELETE /api/Series/{id}
 ```
-Chapters
+### Chapters
 
 Example endpoints:
 
@@ -197,7 +197,7 @@ POST   /api/Chapters
 PUT    /api/Chapters/{id}
 DELETE /api/Chapters/{id}
 ```
-Products
+### Products
 
 Example endpoints:
 ```bash
@@ -206,15 +206,16 @@ GET    /api/Products/{id}
 POST   /api/Products
 PUT    /api/Products/{id}
 DELETE /api/Products/{id}
-Orders and Checkout
 ```
+
+### Orders and Checkout
 Example endpoints:
 
 ```bash
 POST /api/Orders/checkout
 GET  /api/Orders/my-orders
 ```
-Stripe Webhook
+### Stripe Webhook
 
 Example endpoint:
 ```bash
